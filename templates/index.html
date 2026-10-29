@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <section class="nominations">
+        {% for nomination in nominations %}
+            <a class="nomination" href="{% url 'nomination' nomination.slug %}">
+                <h2>{{ nomination.name }}</h2>
+            </a>
+        {% empty %}
+            <p class="empty">Nominatsiyalar hali qo‘shilmagan.</p>
+        {% endfor %}
+    </section>
+{% endblock %}

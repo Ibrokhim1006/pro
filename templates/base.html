@@ -1,0 +1,357 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Eng yaxshi xodim nominatsiyasi{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #0d3f2e;
+            --green-deep: #08281d;
+            --cream: #f8f3e8;
+            --gold: #d7b56a;
+            --gold-deep: #a6843d;
+            --ink: #1a2b22;
+            --muted: #5d6b62;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--cream);
+            font-family: Manrope, "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at 50% 0%, rgba(215, 181, 106, 0.16), transparent 36%),
+                radial-gradient(circle at 50% 18%, #176049 0%, var(--green) 42%, var(--green-deep) 100%);
+        }
+
+        .page {
+            width: min(1100px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 48px 0 72px;
+        }
+
+        .masthead { text-align: center; }
+
+        .logo-ring {
+            width: 148px;
+            height: 148px;
+            margin: 0 auto 22px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid var(--gold);
+            box-shadow: 0 0 0 10px rgba(215, 181, 106, 0.18), 0 20px 40px rgba(0, 0, 0, 0.28);
+            background: #fff;
+        }
+
+        .logo-ring img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.14);
+        }
+
+        .org {
+            margin: 0;
+            font-size: 0.92rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        h1 {
+            margin: 14px 0 0;
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 600;
+            line-height: 1.08;
+        }
+
+        .rule {
+            width: 120px;
+            height: 1px;
+            margin: 22px auto 0;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .nominations {
+            display: grid;
+            gap: 18px;
+            margin-top: 36px;
+        }
+
+        a.nomination {
+            display: block;
+            padding: 28px 32px;
+            border: 1px solid rgba(215, 181, 106, 0.45);
+            border-radius: 18px;
+            background: rgba(248, 243, 232, 0.96);
+            color: var(--ink);
+            text-decoration: none;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+        }
+
+        a.nomination h2 {
+            margin: 0;
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+            font-weight: 600;
+            line-height: 1.15;
+            text-align: center;
+        }
+
+        .candidate-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .candidate {
+            overflow: hidden;
+            border-radius: 16px;
+            background: var(--cream);
+            color: var(--ink);
+            border: 1px solid rgba(215, 181, 106, 0.45);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+        }
+
+        .candidate img,
+        .portrait-fallback {
+            display: block;
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            background: #efe8da;
+        }
+
+        .portrait-fallback {
+            display: grid;
+            place-items: center;
+            color: var(--green);
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: 4rem;
+        }
+
+        .candidate-body { padding: 16px 16px 18px; }
+
+        .candidate strong {
+            display: block;
+            font-size: 1.05rem;
+        }
+
+        .candidate p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+        .qr-panel {
+            margin-top: 36px;
+            padding: 28px 24px 32px;
+            text-align: center;
+            border-radius: 18px;
+            background: rgba(248, 243, 232, 0.96);
+            color: var(--ink);
+        }
+
+        .qr-panel img {
+            width: min(280px, 70vw);
+            height: auto;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .qr-panel h2 {
+            margin: 18px 0 8px;
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: 2rem;
+        }
+
+        .qr-panel p { margin: 0; color: var(--muted); line-height: 1.5; }
+
+        .qr-warn {
+            margin-top: 12px !important;
+            color: #8a3b1a !important;
+        }
+
+        .vote-button {
+            width: 100%;
+            margin-top: 14px;
+            padding: 12px 16px;
+            border: 0;
+            border-radius: 999px;
+            background: var(--green);
+            color: var(--cream);
+            font: 600 1rem Manrope, "Segoe UI", sans-serif;
+            cursor: pointer;
+        }
+
+        .notice,
+        .error {
+            margin-top: 28px;
+            padding: 16px 18px;
+            border-radius: 14px;
+            text-align: center;
+            background: rgba(248, 243, 232, 0.96);
+            color: var(--ink);
+        }
+
+        .error { color: #8a3b1a; }
+
+        .candidate.is-chosen,
+        .candidate.is-winner { outline: 3px solid var(--gold); }
+
+        .timer {
+            margin: 8px 0 0;
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: clamp(4rem, 12vw, 7rem);
+            line-height: 1;
+            letter-spacing: 0.04em;
+            color: var(--gold);
+            text-align: center;
+        }
+
+        .start-button {
+            display: block;
+            width: min(420px, 100%);
+            margin: 8px auto 0;
+            padding: 16px 24px;
+            font-size: 1.05rem;
+        }
+
+        .winner-name {
+            margin: 8px 0;
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            line-height: 1.1;
+        }
+
+        .vote-count {
+            margin: 10px 0 0;
+            color: var(--green);
+            font-weight: 600;
+        }
+
+        .vote-bar {
+            height: 6px;
+            margin-top: 8px;
+            border-radius: 999px;
+            background: rgba(13, 63, 46, 0.1);
+            overflow: hidden;
+        }
+
+        .vote-bar span {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--gold-deep), var(--gold));
+        }
+
+        .salute {
+            position: relative;
+            overflow: hidden;
+            margin-top: 28px;
+            padding: 36px 24px 32px;
+            text-align: center;
+            border-radius: 22px;
+            border: 1px solid rgba(215, 181, 106, 0.7);
+            background:
+                radial-gradient(circle at 50% 0%, rgba(215, 181, 106, 0.45), transparent 55%),
+                #f8f3e8;
+            color: var(--ink);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+        }
+
+        .salute canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .salute-kicker {
+            margin: 0;
+            color: var(--gold-deep);
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+        }
+
+        .salute h2 {
+            margin: 8px 0 0;
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: clamp(2.4rem, 6vw, 4.4rem);
+        }
+
+        .salute-person {
+            position: relative;
+            z-index: 1;
+            margin-top: 18px;
+        }
+
+        .salute-person img,
+        .salute-portrait {
+            width: 148px;
+            height: 148px;
+            margin: 0 auto 12px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--gold);
+            box-shadow: 0 0 0 8px rgba(215, 181, 106, 0.25);
+        }
+
+        .salute-portrait {
+            display: grid;
+            place-items: center;
+            background: #fff;
+            color: var(--green);
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: 4rem;
+        }
+
+        .salute .winner-name { color: var(--green); }
+
+        .salute .vote-count {
+            color: var(--ink);
+            font-size: 1.15rem;
+        }
+
+        .empty {
+            margin: 36px 0 0;
+            text-align: center;
+            color: rgba(248, 243, 232, 0.8);
+        }
+
+        @media (max-width: 640px) {
+            .page { padding-top: 28px; }
+            .logo-ring { width: 120px; height: 120px; }
+            .org { letter-spacing: 0.08em; }
+            a.nomination { padding: 22px 18px; }
+            .candidate-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header class="masthead">
+            <a class="logo-ring" href="{% url 'home' %}" style="display:block; text-decoration:none;">
+                <img src="{% static 'logo.png' %}" alt="Buxoro viloyati ko‘p tarmoqli tibbiyot markazi">
+            </a>
+            <p class="org">Buxoro viloyati ko‘p tarmoqli tibbiyot markazi</p>
+            <h1>{% block heading %}Eng yaxshi xodim nominatsiyasi{% endblock %}</h1>
+            <div class="rule"></div>
+        </header>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

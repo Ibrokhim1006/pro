@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ nomination.name }}{% endblock %}
+{% block heading %}{{ nomination.name }}{% endblock %}
+
+{% block content %}
+    {% if status == 'waiting' %}
+        <p class="notice">Ovoz berish hali boshlanmagan.</p>
+    {% elif status == 'closed' %}
+        <p class="notice">Ovoz berish yakunlandi.</p>
+        {% for winner in winners %}
+            <p class="notice">G‘olib: <strong>{{ winner.full_name }}</strong></p>
+        {% empty %}
+            <p class="notice">Bu davrada g‘olib aniqlanmadi.</p>
+        {% endfor %}
+    {% endif %}
+    {% if existing %}
+        <p class="notice">Ovozingiz qabul qilindi. Siz <strong>{{ existing.candidate.full_name }}</strong> uchun ovoz berdingiz.</p>
+    {% endif %}
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    {% if candidates %}
+        <section class="candidate-grid">
+            {% for candidate in candidates %}
+                <article class="candidate{% if existing.candidate_id == candidate.id %} is-chosen{% endif %}">
+                    {% if candidate.photo %}
+                        <img src="{{ candidate.photo.url }}" alt="{{ candidate.full_name }}">
+                    {% else %}
+                        <div class="portrait-fallback">{{ candidate.full_name|first }}</div>
+                    {% endif %}
+                    <div class="candidate-body">
+                        <strong>{{ candidate.full_name }}</strong>
+                        {% if candidate.description %}
+                            <p>{{ candidate.description }}</p>
+                        {% endif %}
+                        {% if status == 'closed' %}
+                            <p class="vote-count">{{ candidate.window_votes }} ta ovoz</p>
+                        {% endif %}
+                        {% if status == 'open' and not existing %}
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="candidate" value="{{ candidate.id }}">
+                                <input type="hidden" name="device_id" value="{{ device_id }}">
+                                <button class="vote-button" type="submit">Ovoz berish</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <p class="empty">Nomzodlar hali qo‘shilmagan.</p>
+    {% endif %}
+    <script>
+        (function () {
+            var key = 'voter_id';
+            var current = '';
+            try {
+                current = localStorage.getItem(key) || '';
+            } catch (error) {
+                current = '';
+            }
+            if (!/^[a-f0-9]{32}$/.test(current)) {
+                current = '{{ device_id }}';
+                try {
+                    localStorage.setItem(key, current);
+                } catch (error) {}
+            }
+            document.querySelectorAll('input[name="device_id"]').forEach(function (input) {
+                input.value = current;
+            });
+        })();
+    </script>
+{% endblock %}

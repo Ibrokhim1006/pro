@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ nomination.name }}{% endblock %}
+{% block heading %}{{ nomination.name }}{% endblock %}
+
+{% block content %}
+    {% if status == 'open' %}
+        <p class="timer" data-ends="{{ ends_at|date:'c' }}">05:00</p>
+    {% endif %}
+
+    {% if candidates %}
+        <section class="candidate-grid">
+            {% for candidate in candidates %}
+                <article class="candidate{% if candidate.is_winner %} is-winner{% endif %}">
+                    {% if candidate.photo %}
+                        <img src="{{ candidate.photo.url }}" alt="{{ candidate.full_name }}">
+                    {% else %}
+                        <div class="portrait-fallback">{{ candidate.full_name|first }}</div>
+                    {% endif %}
+                    <div class="candidate-body">
+                        <strong>{{ candidate.full_name }}</strong>
+                        {% if candidate.description %}
+                            <p>{{ candidate.description }}</p>
+                        {% endif %}
+                        {% if status != 'waiting' %}
+                            <p class="vote-count">{{ candidate.window_votes }} ta ovoz</p>
+                            {% if max_votes %}
+                                <div class="vote-bar" aria-hidden="true">
+                                    <span style="width: {% widthratio candidate.window_votes max_votes 100 %}%"></span>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <p class="empty">Nomzodlar hali qo‘shilmagan.</p>
+    {% endif %}
+
+    {% if status == 'waiting' %}
+        <section class="qr-panel">
+            <h2>Ovoz berish 5 daqiqa</h2>
+            <p>Boshlagach QR kod yoqiladi. Besh daqiqa tugagach g‘olib e’lon qilinadi.</p>
+            <form method="post" action="{% url 'start_voting' nomination.slug %}">
+                {% csrf_token %}
+                <button class="vote-button start-button" type="submit">Ovoz berishni boshlash</button>
+            </form>
+        </section>
+    {% elif status == 'open' %}
+        <section class="qr-panel">
+            <img src="{% url 'nomination_qr' nomination.slug %}" alt="Ovoz berish uchun QR kod">
+            <h2>QR kodni skaner qiling</h2>
+            <p>Telefoningizda shu nominatsiyaning nomzodlari ochiladi. Bittasini tanlab ovoz berasiz.</p>
+            {% if local_only %}
+                <p class="qr-warn">Hozir sahifa faqat shu kompyuterda ochiladi. Zalda telefonlar ovoz berishi uchun sahifani kompyuterning tarmoq manzili bilan oching.</p>
+            {% endif %}
+        </section>
+        <script>
+            (function () {
+                var node = document.querySelector('.timer');
+                var ends = new Date(node.dataset.ends).getTime();
+                function tick() {
+                    var left = Math.max(0, ends - Date.now());
+                    var total = Math.ceil(left / 1000);
+                    var minutes = String(Math.floor(total / 60)).padStart(2, '0');
+                    var seconds = String(total % 60).padStart(2, '0');
+                    node.textContent = minutes + ':' + seconds;
+                    if (left <= 0) {
+                        window.location.reload();
+                        return;
+                    }
+                    window.setTimeout(tick, 250);
+                }
+                tick();
+            })();
+        </script>
+    {% elif winners %}
+        <section class="salute">
+            <canvas class="confetti" aria-hidden="true"></canvas>
+            <p class="salute-kicker">Tabriklaymiz</p>
+            <h2>G‘olib</h2>
+            {% for winner in winners %}
+                <div class="salute-person">
+                    {% if winner.photo %}
+                        <img src="{{ winner.photo.url }}" alt="{{ winner.full_name }}">
+                    {% else %}
+                        <div class="salute-portrait">{{ winner.full_name|first }}</div>
+                    {% endif %}
+                    <p class="winner-name">{{ winner.full_name }}</p>
+                    <p class="vote-count">{{ winner.window_votes }} ta ovoz</p>
+                </div>
+            {% endfor %}
+        </section>
+        <script>
+            (function () {
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                var canvas = document.querySelector('.confetti');
+                if (!canvas) return;
+                var ctx = canvas.getContext('2d');
+                var colors = ['#d7b56a', '#f8f3e8', '#0d3f2e', '#a6843d', '#ffffff'];
+                var pieces = [];
+                function size() {
+                    canvas.width = canvas.offsetWidth;
+                    canvas.height = canvas.offsetHeight;
+                }
+                size();
+                for (var i = 0; i < 90; i++) {
+                    pieces.push({
+                        x: canvas.width * (0.2 + Math.random() * 0.6),
+                        y: canvas.height * 0.45,
+                        vx: (Math.random() - 0.5) * 9,
+                        vy: -6 - Math.random() * 7,
+                        g: 0.12 + Math.random() * 0.08,
+                        w: 6 + Math.random() * 6,
+                        h: 8 + Math.random() * 8,
+                        color: colors[i % colors.length],
+                        spin: Math.random() * 0.2
+                    });
+                }
+                var frame = 0;
+                function draw() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    pieces.forEach(function (piece) {
+                        piece.vy += piece.g;
+                        piece.x += piece.vx;
+                        piece.y += piece.vy;
+                        piece.spin += 0.08;
+                        ctx.save();
+                        ctx.translate(piece.x, piece.y);
+                        ctx.rotate(piece.spin);
+                        ctx.fillStyle = piece.color;
+                        ctx.fillRect(-piece.w / 2, -piece.h / 2, piece.w, piece.h);
+                        ctx.restore();
+                    });
+                    frame += 1;
+                    if (frame < 220) requestAnimationFrame(draw);
+                }
+                draw();
+            })();
+        </script>
+    {% else %}
+        <section class="qr-panel">
+            <h2>G‘olib</h2>
+            <p>Bu davrada hech kim ovoz bermadi.</p>
+        </section>
+    {% endif %}
+{% endblock %}
