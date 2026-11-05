@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="utf-8">
+    <title>LED 680×320 — {{ nomination.name }}</title>
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+            background: #141414;
+            color: #f8f3e8;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .slot { position: relative; }
+
+        iframe {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 680px;
+            height: 320px;
+            border: 2px solid #d7b56a;
+            transform-origin: top left;
+            background: #08281d;
+        }
+
+        p { margin: 0; font-size: 14px; letter-spacing: 0.02em; }
+    </style>
+</head>
+<body>
+    <div class="slot">
+        <iframe src="{% url 'nomination' nomination.slug %}" title="LED 680×320"></iframe>
+    </div>
+    <p>LED ekran 680×320. Shu ramka o‘sha o‘lchamni kompyuteringizda kattalashtirib ko‘rsatadi.</p>
+    <script>
+        function fit() {
+            var scale = Math.min((window.innerWidth - 32) / 680, (window.innerHeight - 64) / 320);
+            var frame = document.querySelector('iframe');
+            var slot = document.querySelector('.slot');
+            frame.style.transform = 'scale(' + scale + ')';
+            slot.style.width = (680 * scale) + 'px';
+            slot.style.height = (320 * scale) + 'px';
+        }
+        fit();
+        window.addEventListener('resize', fit);
+    </script>
+</body>
+</html>

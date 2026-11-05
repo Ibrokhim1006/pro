@@ -25,8 +25,6 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-static/
-staticfiles/
 media/
 logs/
 .logs/
@@ -160,6 +158,8 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+media/
+
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can

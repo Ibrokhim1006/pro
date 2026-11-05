@@ -1,148 +1,504 @@
 {% extends 'base.html' %}
 
 {% block title %}{{ nomination.name }}{% endblock %}
+{% block body_class %}hall is-{{ status }}{% if led_preview %} led-preview{% endif %}{% endblock %}
+{% block screen_class %}screen{% endblock %}
 {% block heading %}{{ nomination.name }}{% endblock %}
 
+{% block extra_css %}
+        body.hall .page {
+            width: min(1760px, calc(100vw - 64px));
+            height: 100vh;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 16px 0 18px;
+        }
+
+        body.hall .masthead {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            align-items: center;
+            column-gap: 22px;
+            text-align: left;
+        }
+
+        body.hall .logo-ring {
+            width: 120px;
+            height: 120px;
+            margin: 0;
+            grid-row: span 3;
+        }
+
+        body.hall .org { font-size: 1.35rem; letter-spacing: 0.18em; }
+        body.hall h1 { font-size: clamp(3rem, 4.2vw, 4.8rem); margin-top: 6px; }
+        body.hall .rule { width: 200px; margin: 14px 0 0; }
+
+        body.hall .hall-layout {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        body.hall.is-open .hall-side,
+        body.hall.is-closed .hall-side { order: -1; flex: 0 0 auto; }
+
+        body.hall .hall-board {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+        }
+
+        body.hall .candidate-grid {
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            margin-top: 0;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            align-items: stretch;
+            gap: 16px;
+        }
+
+        body.hall .candidate {
+            min-height: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.hall .candidate[hidden] { display: none !important; }
+
+        body.hall .candidate img,
+        body.hall .portrait-fallback {
+            flex: 1 1 auto;
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            object-fit: cover;
+            object-position: center 42%;
+        }
+
+        body.hall .candidate-body { flex: 0 0 auto; }
+
+        body.hall .candidate-body { padding: 16px 18px 18px; }
+        body.hall.is-closed .candidate-body { padding: 12px 16px 14px; }
+        body.hall .candidate strong { font-size: clamp(1.5rem, 1.8vw, 2rem); }
+        body.hall .candidate p { font-size: 1.15rem; }
+        body.hall .candidate .vote-count { font-size: 1.55rem; margin-top: 6px; }
+        body.hall .vote-bar { height: 10px; margin-top: 8px; }
+
+        body.hall .hall-side .qr-panel,
+        body.hall .hall-side .salute { margin-top: 0; }
+
+        body.hall .timer {
+            margin: 0 0 12px;
+            font-size: clamp(5rem, 7vw, 7.5rem);
+        }
+
+        body.hall.is-open .qr-panel {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+        }
+        body.hall.is-open .qr-panel img {
+            width: min(220px, 28vh);
+            margin: 0 auto;
+            padding: 12px;
+            border-radius: 16px;
+            background: #fff;
+        }
+
+        body.hall .start-button {
+            width: min(640px, 100%);
+            margin-top: 18px;
+            padding: 22px 32px;
+            font-size: 1.6rem;
+        }
+
+        body.hall .salute { padding: 24px 32px 22px; }
+        body.hall .salute-kicker { font-size: 1.25rem; }
+        body.hall .salute h2 { font-size: clamp(3.6rem, 6vw, 5.4rem); margin-top: 2px; }
+        body.hall .salute-person { margin-top: 10px; }
+        body.hall .salute .winner-name { font-size: clamp(2.8rem, 4vw, 4.2rem); margin: 4px 0; }
+        body.hall .salute .vote-count { font-size: 2rem; }
+        body.hall .salute-person img,
+        body.hall .salute-portrait { width: 150px; height: 150px; margin-bottom: 8px; }
+
+        @media (max-width: 1100px) {
+            body.hall .page { width: min(1100px, calc(100% - 32px)); }
+            body.hall .masthead { display: block; text-align: center; }
+            body.hall .logo-ring { margin: 0 auto 18px; }
+            body.hall .rule { margin-left: auto; margin-right: auto; }
+            body.hall .hall-layout { flex-direction: column; }
+        }
+
+        body.hall .screen {
+            width: 100%;
+            height: 100vh;
+            container-type: size;
+            container-name: hall;
+        }
+
+        body.hall.led-preview {
+            min-height: 100vh;
+            overflow: hidden;
+            background: #141414;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.hall.led-preview .screen {
+            width: 680px;
+            height: 320px;
+            flex: none;
+            overflow: hidden;
+            box-shadow: 0 0 0 2px #d7b56a;
+            transform-origin: center center;
+        }
+
+        @container hall (max-height: 420px) {
+            body.hall .page {
+                width: calc(100% - 8px);
+                height: 100%;
+                padding: 4px 0;
+                overflow: hidden;
+            }
+
+            body.hall .masthead {
+                display: grid;
+                grid-template-columns: 36px 1fr;
+                column-gap: 8px;
+                align-items: center;
+                text-align: left;
+            }
+
+            body.hall .logo-ring {
+                width: 36px;
+                height: 36px;
+                margin: 0;
+                grid-row: span 2;
+                border-width: 2px;
+                box-shadow: none;
+            }
+
+            body.hall .org {
+                font-size: 9px;
+                letter-spacing: 0.04em;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+
+            body.hall h1 {
+                margin: 0;
+                font-size: 16px;
+                line-height: 1.05;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+
+            body.hall .rule { display: none; }
+
+            body.hall .hall-layout,
+            body.hall.is-open .hall-layout,
+            body.hall.is-closed .hall-layout,
+            body.hall.is-waiting .hall-layout {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+                margin-top: 4px;
+            }
+
+            body.hall.is-open .hall-side,
+            body.hall.is-closed .hall-side,
+            body.hall.is-waiting .hall-side {
+                order: -1;
+                flex: 0 0 auto;
+                width: 100%;
+            }
+
+            body.hall .hall-board { flex: 1; min-width: 0; min-height: 0; }
+
+            body.hall .candidate-grid {
+                height: 100%;
+                width: 100%;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                grid-auto-flow: row;
+                justify-content: stretch;
+                gap: 6px;
+            }
+
+            body.hall .candidate img,
+            body.hall .portrait-fallback,
+            body.hall.is-closed .candidate img,
+            body.hall.is-closed .portrait-fallback {
+                height: 100%;
+                min-height: 0;
+                object-fit: cover;
+                object-position: center 42%;
+            }
+
+            body.hall .candidate-body,
+            body.hall.is-closed .candidate-body { padding: 4px 6px 6px; }
+            body.hall .candidate strong { font-size: 13px; line-height: 1.15; }
+            body.hall .candidate p {
+                margin-top: 2px;
+                font-size: 11px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            body.hall .candidate .vote-count { font-size: 12px; }
+            body.hall .vote-bar { height: 4px; margin-top: 3px; }
+
+            body.hall.is-open .qr-panel img {
+                width: 108px;
+                padding: 5px;
+                border-radius: 8px;
+            }
+
+            body.hall .qr-panel,
+            body.hall .salute {
+                height: auto;
+                margin: 0;
+                padding: 4px;
+                border-radius: 10px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            body.hall .salute h2 { margin: 0; font-size: 22px; }
+            body.hall .salute-kicker { font-size: 11px; }
+            body.hall .salute .winner-name { font-size: 14px; margin: 2px 0; }
+            body.hall .salute .vote-count { font-size: 12px; }
+            body.hall .salute-person { margin-top: 4px; }
+            body.hall .salute-person img,
+            body.hall .salute-portrait { width: 64px; height: 64px; margin: 0 auto 4px; }
+            body.hall .start-button { width: 100%; margin-top: 6px; padding: 8px; font-size: 13px; }
+            body.hall .qr-panel h2 { font-size: 16px; margin: 4px 0; }
+            body.hall .qr-panel p { font-size: 11px; }
+        }
+{% endblock %}
+
 {% block content %}
-    {% if status == 'open' %}
-        <p class="timer" data-ends="{{ ends_at|date:'c' }}">05:00</p>
-    {% endif %}
-
-    {% if candidates %}
-        <section class="candidate-grid">
-            {% for candidate in candidates %}
-                <article class="candidate{% if candidate.is_winner %} is-winner{% endif %}">
-                    {% if candidate.photo %}
-                        <img src="{{ candidate.photo.url }}" alt="{{ candidate.full_name }}">
-                    {% else %}
-                        <div class="portrait-fallback">{{ candidate.full_name|first }}</div>
-                    {% endif %}
-                    <div class="candidate-body">
-                        <strong>{{ candidate.full_name }}</strong>
-                        {% if candidate.description %}
-                            <p>{{ candidate.description }}</p>
-                        {% endif %}
-                        {% if status != 'waiting' %}
-                            <p class="vote-count">{{ candidate.window_votes }} ta ovoz</p>
-                            {% if max_votes %}
-                                <div class="vote-bar" aria-hidden="true">
-                                    <span style="width: {% widthratio candidate.window_votes max_votes 100 %}%"></span>
-                                </div>
+    <div class="hall-layout">
+        <div class="hall-board">
+            {% if candidates %}
+                <section class="candidate-grid">
+                    {% for candidate in candidates %}
+                        <article class="candidate{% if candidate.is_winner %} is-winner{% endif %}">
+                            {% if candidate.photo %}
+                                <img src="{{ candidate.photo.url }}" alt="{{ candidate.full_name }}">
+                            {% else %}
+                                <div class="portrait-fallback">{{ candidate.full_name|first }}</div>
                             {% endif %}
-                        {% endif %}
-                    </div>
-                </article>
-            {% endfor %}
-        </section>
-    {% else %}
-        <p class="empty">Nomzodlar hali qo‘shilmagan.</p>
-    {% endif %}
-
-    {% if status == 'waiting' %}
-        <section class="qr-panel">
-            <h2>Ovoz berish 5 daqiqa</h2>
-            <p>Boshlagach QR kod yoqiladi. Besh daqiqa tugagach g‘olib e’lon qilinadi.</p>
-            <form method="post" action="{% url 'start_voting' nomination.slug %}">
-                {% csrf_token %}
-                <button class="vote-button start-button" type="submit">Ovoz berishni boshlash</button>
-            </form>
-        </section>
-    {% elif status == 'open' %}
-        <section class="qr-panel">
-            <img src="{% url 'nomination_qr' nomination.slug %}" alt="Ovoz berish uchun QR kod">
-            <h2>QR kodni skaner qiling</h2>
-            <p>Telefoningizda shu nominatsiyaning nomzodlari ochiladi. Bittasini tanlab ovoz berasiz.</p>
-            {% if local_only %}
-                <p class="qr-warn">Hozir sahifa faqat shu kompyuterda ochiladi. Zalda telefonlar ovoz berishi uchun sahifani kompyuterning tarmoq manzili bilan oching.</p>
+                            <div class="candidate-body">
+                                <strong>{{ candidate.full_name }}</strong>
+                                {% if candidate.description %}
+                                    <p>{{ candidate.description }}</p>
+                                {% endif %}
+                                {% if status != 'waiting' %}
+                                    <p class="vote-count">{{ candidate.window_votes }} ta ovoz</p>
+                                    {% if max_votes %}
+                                        <div class="vote-bar" aria-hidden="true">
+                                            <span style="width: {% widthratio candidate.window_votes max_votes 100 %}%"></span>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                </section>
+            {% else %}
+                <p class="empty">Nomzodlar hali qo‘shilmagan.</p>
             {% endif %}
-        </section>
-        <script>
-            (function () {
-                var node = document.querySelector('.timer');
-                var ends = new Date(node.dataset.ends).getTime();
-                function tick() {
-                    var left = Math.max(0, ends - Date.now());
-                    var total = Math.ceil(left / 1000);
-                    var minutes = String(Math.floor(total / 60)).padStart(2, '0');
-                    var seconds = String(total % 60).padStart(2, '0');
-                    node.textContent = minutes + ':' + seconds;
-                    if (left <= 0) {
-                        window.location.reload();
-                        return;
+        </div>
+
+        <aside class="hall-side">
+            {% if status == 'waiting' %}
+                <section class="qr-panel">
+                    <h2>Ovoz berish 5 daqiqa</h2>
+                    <p>Boshlagach QR kod yoqiladi. Besh daqiqa tugagach g‘olib e’lon qilinadi.</p>
+                    <form method="post" action="{% url 'start_voting' nomination.slug %}">
+                        {% csrf_token %}
+                        <button class="vote-button start-button" type="submit">Ovoz berishni boshlash</button>
+                    </form>
+                </section>
+            {% elif status == 'open' %}
+                <section class="qr-panel">
+                    <p class="timer" data-ends="{{ ends_at|date:'c' }}" hidden>05:00</p>
+                    <img src="{% url 'nomination_qr' nomination.slug %}" alt="">
+                </section>
+                <script>
+                    (function () {
+                        var node = document.querySelector('.timer');
+                        var ends = new Date(node.dataset.ends).getTime();
+                        function tick() {
+                            var left = Math.max(0, ends - Date.now());
+                            var total = Math.ceil(left / 1000);
+                            var minutes = String(Math.floor(total / 60)).padStart(2, '0');
+                            var seconds = String(total % 60).padStart(2, '0');
+                            node.textContent = minutes + ':' + seconds;
+                            if (left <= 0) {
+                                window.location.reload();
+                                return;
+                            }
+                            window.setTimeout(tick, 250);
+                        }
+                        tick();
+                    })();
+                </script>
+            {% elif winners %}
+                <section class="salute">
+                    <canvas class="confetti" aria-hidden="true"></canvas>
+                    <p class="salute-kicker">Tabriklaymiz</p>
+                    <h2>G‘olib</h2>
+                    {% for winner in winners %}
+                        <div class="salute-person">
+                            {% if winner.photo %}
+                                <img src="{{ winner.photo.url }}" alt="{{ winner.full_name }}">
+                            {% else %}
+                                <div class="salute-portrait">{{ winner.full_name|first }}</div>
+                            {% endif %}
+                            <p class="winner-name">{{ winner.full_name }}</p>
+                            <p class="vote-count">{{ winner.window_votes }} ta ovoz</p>
+                        </div>
+                    {% endfor %}
+                </section>
+                <script>
+                    (function () {
+                        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                        var canvas = document.querySelector('.confetti');
+                        if (!canvas) return;
+                        var ctx = canvas.getContext('2d');
+                        var colors = ['#d7b56a', '#f8f3e8', '#0d3f2e', '#a6843d', '#ffffff'];
+                        var pieces = [];
+                        function size() {
+                            canvas.width = canvas.offsetWidth;
+                            canvas.height = canvas.offsetHeight;
+                        }
+                        size();
+                        for (var i = 0; i < 90; i++) {
+                            pieces.push({
+                                x: canvas.width * (0.2 + Math.random() * 0.6),
+                                y: canvas.height * 0.45,
+                                vx: (Math.random() - 0.5) * 9,
+                                vy: -6 - Math.random() * 7,
+                                g: 0.12 + Math.random() * 0.08,
+                                w: 6 + Math.random() * 6,
+                                h: 8 + Math.random() * 8,
+                                color: colors[i % colors.length],
+                                spin: Math.random() * 0.2
+                            });
+                        }
+                        var frame = 0;
+                        function draw() {
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            pieces.forEach(function (piece) {
+                                piece.vy += piece.g;
+                                piece.x += piece.vx;
+                                piece.y += piece.vy;
+                                piece.spin += 0.08;
+                                ctx.save();
+                                ctx.translate(piece.x, piece.y);
+                                ctx.rotate(piece.spin);
+                                ctx.fillStyle = piece.color;
+                                ctx.fillRect(-piece.w / 2, -piece.h / 2, piece.w, piece.h);
+                                ctx.restore();
+                            });
+                            frame += 1;
+                            if (frame < 220) requestAnimationFrame(draw);
+                        }
+                        draw();
+                    })();
+                </script>
+            {% else %}
+                <section class="qr-panel">
+                    <h2>G‘olib</h2>
+                    <p>Bu davrada hech kim ovoz bermadi.</p>
+                </section>
+            {% endif %}
+        </aside>
+    </div>
+    <script>
+        (function () {
+            var page = 0;
+            var perPage = 0;
+            var timer = null;
+
+            function list() {
+                return Array.prototype.slice.call(document.querySelectorAll('.candidate-grid .candidate'));
+            }
+
+            function apply() {
+                var cards = list();
+                if (!cards.length || perPage >= cards.length) {
+                    cards.forEach(function (card) { card.hidden = false; });
+                    return;
+                }
+                var start = (page * perPage) % cards.length;
+                cards.forEach(function (card, index) {
+                    var offset = (index - start + cards.length) % cards.length;
+                    card.hidden = offset >= perPage;
+                });
+            }
+
+            function measure() {
+                var cards = list();
+                var screen = document.querySelector('.screen');
+                var short = screen && screen.offsetHeight <= 420;
+                cards.forEach(function (card) { card.hidden = false; });
+                if (short) {
+                    perPage = Math.min(4, cards.length);
+                } else {
+                    var board = document.querySelector('.hall-board');
+                    perPage = cards.length;
+                    if (board) {
+                        for (var count = 1; count <= cards.length; count++) {
+                            cards.forEach(function (card, index) { card.hidden = index >= count; });
+                            if (board.scrollHeight > board.clientHeight + 4) break;
+                            perPage = count;
+                        }
                     }
-                    window.setTimeout(tick, 250);
                 }
-                tick();
-            })();
-        </script>
-    {% elif winners %}
-        <section class="salute">
-            <canvas class="confetti" aria-hidden="true"></canvas>
-            <p class="salute-kicker">Tabriklaymiz</p>
-            <h2>G‘olib</h2>
-            {% for winner in winners %}
-                <div class="salute-person">
-                    {% if winner.photo %}
-                        <img src="{{ winner.photo.url }}" alt="{{ winner.full_name }}">
-                    {% else %}
-                        <div class="salute-portrait">{{ winner.full_name|first }}</div>
-                    {% endif %}
-                    <p class="winner-name">{{ winner.full_name }}</p>
-                    <p class="vote-count">{{ winner.window_votes }} ta ovoz</p>
-                </div>
-            {% endfor %}
-        </section>
+                if (page * perPage >= cards.length) page = 0;
+                apply();
+                var rotating = cards.length > perPage;
+                if (rotating && !timer) {
+                    timer = window.setInterval(function () {
+                        page += 1;
+                        apply();
+                    }, 4000);
+                }
+                if (!rotating && timer) {
+                    window.clearInterval(timer);
+                    timer = null;
+                    page = 0;
+                    apply();
+                }
+            }
+
+            measure();
+            window.addEventListener('resize', measure);
+        })();
+    </script>
+    {% if led_preview %}
         <script>
             (function () {
-                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-                var canvas = document.querySelector('.confetti');
-                if (!canvas) return;
-                var ctx = canvas.getContext('2d');
-                var colors = ['#d7b56a', '#f8f3e8', '#0d3f2e', '#a6843d', '#ffffff'];
-                var pieces = [];
-                function size() {
-                    canvas.width = canvas.offsetWidth;
-                    canvas.height = canvas.offsetHeight;
+                var screen = document.querySelector('.screen');
+                function fit() {
+                    var scale = Math.min((window.innerWidth - 32) / 680, (window.innerHeight - 32) / 320);
+                    screen.style.transform = 'scale(' + scale + ')';
                 }
-                size();
-                for (var i = 0; i < 90; i++) {
-                    pieces.push({
-                        x: canvas.width * (0.2 + Math.random() * 0.6),
-                        y: canvas.height * 0.45,
-                        vx: (Math.random() - 0.5) * 9,
-                        vy: -6 - Math.random() * 7,
-                        g: 0.12 + Math.random() * 0.08,
-                        w: 6 + Math.random() * 6,
-                        h: 8 + Math.random() * 8,
-                        color: colors[i % colors.length],
-                        spin: Math.random() * 0.2
-                    });
-                }
-                var frame = 0;
-                function draw() {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    pieces.forEach(function (piece) {
-                        piece.vy += piece.g;
-                        piece.x += piece.vx;
-                        piece.y += piece.vy;
-                        piece.spin += 0.08;
-                        ctx.save();
-                        ctx.translate(piece.x, piece.y);
-                        ctx.rotate(piece.spin);
-                        ctx.fillStyle = piece.color;
-                        ctx.fillRect(-piece.w / 2, -piece.h / 2, piece.w, piece.h);
-                        ctx.restore();
-                    });
-                    frame += 1;
-                    if (frame < 220) requestAnimationFrame(draw);
-                }
-                draw();
+                fit();
+                window.addEventListener('resize', fit);
             })();
         </script>
-    {% else %}
-        <section class="qr-panel">
-            <h2>G‘olib</h2>
-            <p>Bu davrada hech kim ovoz bermadi.</p>
-        </section>
     {% endif %}
 {% endblock %}

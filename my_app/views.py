@@ -65,6 +65,7 @@ def nomination_detail(request, slug):
     context.update({
         'nomination': nomination,
         'local_only': host in {'127.0.0.1', 'localhost', '::1'},
+        'led_preview': request.GET.get('preview') == 'led',
     })
     return render(request, 'nomination.html', context)
 
