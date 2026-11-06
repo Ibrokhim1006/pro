@@ -65,7 +65,6 @@ def nomination_detail(request, slug):
     context.update({
         'nomination': nomination,
         'local_only': host in {'127.0.0.1', 'localhost', '::1'},
-        'led_preview': request.GET.get('preview') == 'led',
     })
     return render(request, 'nomination.html', context)
 
@@ -79,15 +78,32 @@ def start_voting(request, slug):
     return redirect('nomination', slug=nomination.slug)
 
 
+def _vote_url(request, slug):
+    host = request.get_host()
+    hostname, _, port = host.partition(':')
+    if hostname in {'127.0.0.1', 'localhost', '::1'}:
+        import socket
+        probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            probe.connect(('8.8.8.8', 80))
+            hostname = probe.getsockname()[0]
+        except OSError:
+            pass
+        finally:
+            probe.close()
+        host = f'{hostname}:{port}' if port else hostname
+    return f'{request.scheme}://{host}{reverse("vote", args=[slug])}'
+
+
 def nomination_qr(request, slug):
     nomination = get_object_or_404(Nomination, slug=slug)
     if nomination.voting_status() != 'open':
         return HttpResponseNotFound()
-    vote_url = request.build_absolute_uri(reverse('vote', args=[nomination.slug]))
-    code = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=10, border=2)
+    vote_url = _vote_url(request, nomination.slug)
+    code = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=16, border=4)
     code.add_data(vote_url)
     code.make(fit=True)
-    image = code.make_image(fill_color='#0d3f2e', back_color='#ffffff')
+    image = code.make_image(fill_color='#000000', back_color='#ffffff')
     buffer = BytesIO()
     image.save(buffer, format='PNG')
     response = HttpResponse(buffer.getvalue(), content_type='image/png')

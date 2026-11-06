@@ -343,7 +343,7 @@
         }
     </style>
 </head>
-<body class="{% block body_class %}{% endblock %}">
+<body class="{% block body_class %}{% endblock %}" {% block body_attrs %}{% endblock %}>
     <div class="{% block screen_class %}{% endblock %}">
     <main class="page">
         <header class="masthead">

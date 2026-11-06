@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}{{ nomination.name }}{% endblock %}
-{% block body_class %}hall is-{{ status }}{% if led_preview %} led-preview{% endif %}{% endblock %}
+{% block body_class %}hall is-{{ status }}{% endblock %}
 {% block screen_class %}screen{% endblock %}
 {% block heading %}{{ nomination.name }}{% endblock %}
 
@@ -18,21 +18,21 @@
 
         body.hall .masthead {
             display: grid;
-            grid-template-columns: 120px 1fr;
+            grid-template-columns: 84px 1fr;
             align-items: center;
             column-gap: 22px;
             text-align: left;
         }
 
         body.hall .logo-ring {
-            width: 120px;
-            height: 120px;
+            width: 84px;
+            height: 84px;
             margin: 0;
             grid-row: span 3;
         }
 
-        body.hall .org { font-size: 1.35rem; letter-spacing: 0.18em; }
-        body.hall h1 { font-size: clamp(3rem, 4.2vw, 4.8rem); margin-top: 6px; }
+        body.hall .org { font-size: 1.05rem; letter-spacing: 0.14em; }
+        body.hall h1 { font-size: clamp(2rem, 3vw, 3.2rem); margin-top: 4px; }
         body.hall .rule { width: 200px; margin: 14px 0 0; }
 
         body.hall .hall-layout {
@@ -44,42 +44,46 @@
             margin-top: 12px;
         }
 
+        body.hall .hall-side { flex: 0 0 auto; }
         body.hall.is-open .hall-side,
-        body.hall.is-closed .hall-side { order: -1; flex: 0 0 auto; }
+        body.hall.is-closed .hall-side { order: -1; }
 
         body.hall .hall-board {
             flex: 1;
             min-height: 0;
-            display: flex;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         body.hall .candidate-grid {
-            flex: 1;
-            min-height: 0;
             width: 100%;
+            height: auto;
             margin-top: 0;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            align-items: stretch;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: start;
+            align-content: start;
             gap: 16px;
         }
 
         body.hall .candidate {
             min-height: 0;
-            height: 100%;
+            height: auto;
             display: flex;
             flex-direction: column;
         }
 
-        body.hall .candidate[hidden] { display: none !important; }
-
         body.hall .candidate img,
         body.hall .portrait-fallback {
-            flex: 1 1 auto;
+            flex: none;
+            align-self: stretch;
+            display: block;
             width: 100%;
-            height: 100%;
-            min-height: 0;
+            height: 42vh;
+            max-height: 460px;
             object-fit: cover;
-            object-position: center 42%;
+            object-position: center 62%;
+            background: transparent;
         }
 
         body.hall .candidate-body { flex: 0 0 auto; }
@@ -100,25 +104,72 @@
         }
 
         body.hall.is-open .qr-panel {
+            position: fixed;
+            z-index: 40;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(420px, 42vh, 70vw);
+            height: min(420px, 42vh, 70vw);
+            max-width: calc(100vw - 16px);
+            max-height: calc(100vh - 16px);
             margin: 0;
             padding: 0;
             background: transparent;
             border-radius: 0;
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
         }
+        body.hall.is-open .qr-panel.is-dragging { cursor: grabbing; }
         body.hall.is-open .qr-panel img {
-            width: min(220px, 28vh);
-            margin: 0 auto;
-            padding: 12px;
-            border-radius: 16px;
+            display: block;
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1 / 1;
+            margin: 0;
+            padding: 0;
+            border-radius: 0;
+            object-fit: contain;
             background: #fff;
+            pointer-events: none;
+            -webkit-user-drag: none;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        body.hall.is-open .qr-resize {
+            position: absolute;
+            right: -8px;
+            bottom: -8px;
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            border: 3px solid #fff;
+            border-radius: 8px;
+            background: #0d3f2e;
+            cursor: nwse-resize;
+            touch-action: none;
+        }
+        body.hall.is-open .qr-resize::after {
+            content: "";
+            position: absolute;
+            right: 5px;
+            bottom: 5px;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid #fff;
+            border-bottom: 2px solid #fff;
         }
 
         body.hall .start-button {
             width: min(640px, 100%);
-            margin-top: 18px;
-            padding: 22px 32px;
-            font-size: 1.6rem;
+            margin-top: 12px;
+            padding: 14px 24px;
+            font-size: 1.35rem;
         }
+
+        body.hall.is-waiting .qr-panel { padding: 14px 18px; }
 
         body.hall .salute { padding: 24px 32px 22px; }
         body.hall .salute-kicker { font-size: 1.25rem; }
@@ -140,29 +191,10 @@
         body.hall .screen {
             width: 100%;
             height: 100vh;
-            container-type: size;
-            container-name: hall;
+            height: 100dvh;
         }
 
-        body.hall.led-preview {
-            min-height: 100vh;
-            overflow: hidden;
-            background: #141414;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        body.hall.led-preview .screen {
-            width: 680px;
-            height: 320px;
-            flex: none;
-            overflow: hidden;
-            box-shadow: 0 0 0 2px #d7b56a;
-            transform-origin: center center;
-        }
-
-        @container hall (max-height: 420px) {
+        @media (max-height: 420px) {
             body.hall .page {
                 width: calc(100% - 8px);
                 height: 100%;
@@ -222,25 +254,16 @@
                 width: 100%;
             }
 
-            body.hall .hall-board { flex: 1; min-width: 0; min-height: 0; }
+            body.hall .hall-board { flex: 1; min-width: 0; min-height: 0; overflow-y: auto; }
 
             body.hall .candidate-grid {
-                height: 100%;
+                height: auto;
                 width: 100%;
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                grid-template-columns: repeat(2, minmax(0, 1fr));
                 grid-auto-flow: row;
                 justify-content: stretch;
+                align-content: start;
                 gap: 6px;
-            }
-
-            body.hall .candidate img,
-            body.hall .portrait-fallback,
-            body.hall.is-closed .candidate img,
-            body.hall.is-closed .portrait-fallback {
-                height: 100%;
-                min-height: 0;
-                object-fit: cover;
-                object-position: center 42%;
             }
 
             body.hall .candidate-body,
@@ -256,10 +279,9 @@
             body.hall .candidate .vote-count { font-size: 12px; }
             body.hall .vote-bar { height: 4px; margin-top: 3px; }
 
-            body.hall.is-open .qr-panel img {
-                width: 108px;
-                padding: 5px;
-                border-radius: 8px;
+            body.hall.is-open .qr-panel {
+                width: min(150px, 42vh);
+                height: min(150px, 42vh);
             }
 
             body.hall .qr-panel,
@@ -283,6 +305,182 @@
             body.hall .start-button { width: 100%; margin-top: 6px; padding: 8px; font-size: 13px; }
             body.hall .qr-panel h2 { font-size: 16px; margin: 4px 0; }
             body.hall .qr-panel p { font-size: 11px; }
+        }
+
+        @media (orientation: portrait) {
+            body.hall .candidate-grid {
+                height: auto;
+                align-content: start;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-auto-flow: row;
+                gap: 12px;
+            }
+
+            body.hall .candidate { height: auto; }
+
+            body.hall .candidate img,
+            body.hall .portrait-fallback {
+                width: 100%;
+                height: 36vh;
+                max-height: none;
+                object-fit: cover;
+                object-position: center 62%;
+            }
+        }
+
+        @media (max-width: 420px) {
+            body.hall .page {
+                width: calc(100% - 8px);
+                height: 100%;
+                padding: 4px 0;
+                overflow: hidden;
+            }
+
+            body.hall .masthead {
+                display: grid;
+                grid-template-columns: 28px 1fr;
+                column-gap: 6px;
+                text-align: left;
+            }
+
+            body.hall .logo-ring {
+                width: 28px;
+                height: 28px;
+                margin: 0;
+                grid-row: span 2;
+                border-width: 2px;
+                box-shadow: none;
+            }
+
+            body.hall .org { font-size: 8px; letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; }
+            body.hall h1 { margin: 0; font-size: 13px; line-height: 1.1; white-space: nowrap; overflow: hidden; }
+            body.hall .rule { display: none; }
+
+            body.hall .hall-layout,
+            body.hall.is-open .hall-layout,
+            body.hall.is-closed .hall-layout,
+            body.hall.is-waiting .hall-layout {
+                flex-direction: column;
+                gap: 6px;
+                margin-top: 4px;
+            }
+
+            body.hall.is-open .hall-side,
+            body.hall.is-closed .hall-side,
+            body.hall.is-waiting .hall-side {
+                order: -1;
+                flex: 0 0 auto;
+                width: 100%;
+            }
+
+            body.hall .hall-board { flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; }
+
+            body.hall .candidate-grid {
+                height: auto;
+                align-content: start;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-auto-flow: row;
+                gap: 6px;
+            }
+
+            body.hall .candidate { height: auto; }
+            body.hall .candidate img,
+            body.hall .portrait-fallback {
+                width: 100%;
+                height: 22vh;
+                max-height: none;
+                object-fit: cover;
+                object-position: center 62%;
+            }
+
+            body.hall .candidate-body,
+            body.hall.is-closed .candidate-body { padding: 4px 6px 6px; }
+            body.hall .candidate strong { font-size: 13px; line-height: 1.15; }
+            body.hall .candidate p {
+                margin-top: 2px;
+                font-size: 11px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            body.hall .candidate .vote-count { font-size: 12px; }
+            body.hall.is-open .qr-panel {
+                width: 120px;
+                height: 120px;
+            }
+            body.hall.is-open .qr-resize {
+                width: 18px;
+                height: 18px;
+                right: -6px;
+                bottom: -6px;
+            }
+            body.hall .qr-panel,
+            body.hall .salute { height: auto; margin: 0; padding: 2px; }
+        }
+
+        @media (min-width: 900px) and (max-height: 700px) {
+            body.hall .page {
+                width: calc(100% - 16px);
+                height: 100%;
+                padding: 8px 0;
+                overflow: hidden;
+            }
+
+            body.hall .masthead {
+                display: grid;
+                grid-template-columns: 52px 1fr;
+                column-gap: 10px;
+                text-align: left;
+            }
+
+            body.hall .logo-ring {
+                width: 52px;
+                height: 52px;
+                margin: 0;
+                grid-row: span 2;
+                border-width: 2px;
+                box-shadow: none;
+            }
+
+            body.hall .org { font-size: 12px; letter-spacing: 0.06em; }
+            body.hall h1 { margin: 0; font-size: 28px; line-height: 1.05; }
+            body.hall .rule { display: none; }
+
+            body.hall .hall-layout,
+            body.hall.is-open .hall-layout,
+            body.hall.is-closed .hall-layout,
+            body.hall.is-waiting .hall-layout {
+                flex-direction: column;
+                gap: 8px;
+                margin-top: 6px;
+            }
+
+            body.hall.is-open .hall-side,
+            body.hall.is-closed .hall-side,
+            body.hall.is-waiting .hall-side {
+                order: -1;
+                flex: 0 0 auto;
+                width: 100%;
+            }
+
+            body.hall .hall-board { min-height: 0; overflow-y: auto; }
+            body.hall .candidate-grid {
+                height: auto;
+                align-content: start;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-auto-flow: row;
+                gap: 10px;
+            }
+
+            body.hall .candidate strong { font-size: 18px; }
+            body.hall .candidate p { font-size: 13px; }
+            body.hall .candidate .vote-count { font-size: 16px; }
+            body.hall.is-open .qr-panel {
+                width: min(250px, 70vw);
+                height: min(250px, 70vw);
+            }
+            body.hall .qr-panel,
+            body.hall .salute { height: auto; margin: 0; padding: 4px; }
         }
 {% endblock %}
 
@@ -331,9 +529,10 @@
                     </form>
                 </section>
             {% elif status == 'open' %}
-                <section class="qr-panel">
+                <section class="qr-panel" aria-label="QR kod">
                     <p class="timer" data-ends="{{ ends_at|date:'c' }}" hidden>05:00</p>
                     <img src="{% url 'nomination_qr' nomination.slug %}" alt="">
+                    <button class="qr-resize" type="button" aria-label="O‘lchamini o‘zgartirish"></button>
                 </section>
                 <script>
                     (function () {
@@ -352,6 +551,106 @@
                             window.setTimeout(tick, 250);
                         }
                         tick();
+                    })();
+                </script>
+                <script>
+                    (function () {
+                        var panel = document.querySelector('.qr-panel');
+                        if (!panel) return;
+                        var key = 'qr-widget:' + location.pathname;
+                        var drag = null;
+
+                        function clamp(x, y) {
+                            var width = panel.offsetWidth;
+                            var height = panel.offsetHeight;
+                            return {
+                                x: Math.min(Math.max(0, x), Math.max(0, window.innerWidth - width)),
+                                y: Math.min(Math.max(0, y), Math.max(0, window.innerHeight - height))
+                            };
+                        }
+
+                        function place(x, y) {
+                            var point = clamp(x, y);
+                            panel.style.left = point.x + 'px';
+                            panel.style.top = point.y + 'px';
+                            panel.style.right = 'auto';
+                            panel.style.transform = 'none';
+                        }
+
+                        function resize(size) {
+                            var rect = panel.getBoundingClientRect();
+                            var limit = Math.min(window.innerWidth - rect.left, window.innerHeight - rect.top);
+                            if (window.innerWidth <= 420) limit = Math.min(limit, 120);
+                            size = Math.max(72, Math.min(size, limit));
+                            panel.style.width = size + 'px';
+                            panel.style.height = size + 'px';
+                        }
+
+                        try {
+                            var saved = JSON.parse(localStorage.getItem(key) || 'null');
+                            if (saved && typeof saved.w === 'number') resize(saved.w);
+                            if (saved && typeof saved.x === 'number' && typeof saved.y === 'number') {
+                                place(saved.x, saved.y);
+                            }
+                        } catch (error) {}
+
+                        function remember() {
+                            var rect = panel.getBoundingClientRect();
+                            try {
+                                localStorage.setItem(key, JSON.stringify({
+                                    x: rect.left,
+                                    y: rect.top,
+                                    w: rect.width
+                                }));
+                            } catch (error) {}
+                        }
+
+                        panel.addEventListener('pointerdown', function (event) {
+                            if (event.button !== undefined && event.button !== 0) return;
+                            var rect = panel.getBoundingClientRect();
+                            var handle = event.target.closest('.qr-resize');
+                            if (handle) {
+                                place(rect.left, rect.top);
+                                rect = panel.getBoundingClientRect();
+                            }
+                            drag = handle ? {
+                                id: event.pointerId,
+                                mode: 'resize',
+                                x: rect.left,
+                                y: rect.top
+                            } : {
+                                id: event.pointerId,
+                                mode: 'move',
+                                dx: event.clientX - rect.left,
+                                dy: event.clientY - rect.top
+                            };
+                            try { panel.setPointerCapture(event.pointerId); } catch (error) {}
+                            panel.classList.add('is-dragging');
+                        });
+
+                        panel.addEventListener('pointermove', function (event) {
+                            if (!drag || event.pointerId !== drag.id) return;
+                            if (drag.mode === 'resize') {
+                                resize(Math.max(event.clientX - drag.x, event.clientY - drag.y));
+                                return;
+                            }
+                            place(event.clientX - drag.dx, event.clientY - drag.dy);
+                        });
+
+                        function stop(event) {
+                            if (!drag || event.pointerId !== drag.id) return;
+                            drag = null;
+                            panel.classList.remove('is-dragging');
+                            remember();
+                        }
+
+                        panel.addEventListener('pointerup', stop);
+                        panel.addEventListener('pointercancel', stop);
+                        window.addEventListener('resize', function () {
+                            var rect = panel.getBoundingClientRect();
+                            place(rect.left, rect.top);
+                            remember();
+                        });
                     })();
                 </script>
             {% elif winners %}
@@ -426,79 +725,4 @@
             {% endif %}
         </aside>
     </div>
-    <script>
-        (function () {
-            var page = 0;
-            var perPage = 0;
-            var timer = null;
-
-            function list() {
-                return Array.prototype.slice.call(document.querySelectorAll('.candidate-grid .candidate'));
-            }
-
-            function apply() {
-                var cards = list();
-                if (!cards.length || perPage >= cards.length) {
-                    cards.forEach(function (card) { card.hidden = false; });
-                    return;
-                }
-                var start = (page * perPage) % cards.length;
-                cards.forEach(function (card, index) {
-                    var offset = (index - start + cards.length) % cards.length;
-                    card.hidden = offset >= perPage;
-                });
-            }
-
-            function measure() {
-                var cards = list();
-                var screen = document.querySelector('.screen');
-                var short = screen && screen.offsetHeight <= 420;
-                cards.forEach(function (card) { card.hidden = false; });
-                if (short) {
-                    perPage = Math.min(4, cards.length);
-                } else {
-                    var board = document.querySelector('.hall-board');
-                    perPage = cards.length;
-                    if (board) {
-                        for (var count = 1; count <= cards.length; count++) {
-                            cards.forEach(function (card, index) { card.hidden = index >= count; });
-                            if (board.scrollHeight > board.clientHeight + 4) break;
-                            perPage = count;
-                        }
-                    }
-                }
-                if (page * perPage >= cards.length) page = 0;
-                apply();
-                var rotating = cards.length > perPage;
-                if (rotating && !timer) {
-                    timer = window.setInterval(function () {
-                        page += 1;
-                        apply();
-                    }, 4000);
-                }
-                if (!rotating && timer) {
-                    window.clearInterval(timer);
-                    timer = null;
-                    page = 0;
-                    apply();
-                }
-            }
-
-            measure();
-            window.addEventListener('resize', measure);
-        })();
-    </script>
-    {% if led_preview %}
-        <script>
-            (function () {
-                var screen = document.querySelector('.screen');
-                function fit() {
-                    var scale = Math.min((window.innerWidth - 32) / 680, (window.innerHeight - 32) / 320);
-                    screen.style.transform = 'scale(' + scale + ')';
-                }
-                fit();
-                window.addEventListener('resize', fit);
-            })();
-        </script>
-    {% endif %}
 {% endblock %}
